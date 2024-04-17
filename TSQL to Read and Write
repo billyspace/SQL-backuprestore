@@ -1,0 +1,21 @@
+DECLARE @DatabaseName AS VARCHAR(100)
+DECLARE @SQL AS VARCHAR(MAX)
+
+DECLARE db_cursor CURSOR FOR 
+SELECT name 
+FROM master.sys.databases 
+WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb') -- Excluding system databases
+
+OPEN db_cursor  
+FETCH NEXT FROM db_cursor INTO @DatabaseName  
+
+WHILE @@FETCH_STATUS = 0  
+BEGIN  
+      SET @SQL = 'ALTER DATABASE [' + @DatabaseName + '] SET READ_WRITE WITH NO_WAIT'
+      EXEC(@SQL)
+
+      FETCH NEXT FROM db_cursor INTO @DatabaseName  
+END  
+
+CLOSE db_cursor  
+DEALLOCATE db_cursor
